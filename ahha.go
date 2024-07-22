@@ -52,14 +52,14 @@ func calc(a string) string {
 	var result string
 	switch splittedA[1] {
 	case "+":
-		//if numc != -999999 {
-		//	panic("Нельзя прибавлять str")
-		//}
+		if numc != -999999 {
+			panic("Нельзя прибавлять str")
+		}
 		result = splittedA[0] + splittedA[2]
 	case "-":
-		//if numc != -999999 {
-		//	panic("Нельзя вычитать str")
-		//}
+		if numc != -999999 {
+			panic("Нельзя вычитать str")
+		}
 		result = strings.Replace(splittedA[0], splittedA[2], "", -1)
 	case "*":
 		if numc == -999999 {
