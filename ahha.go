@@ -51,7 +51,6 @@ func divideString(a string, n int) string {
 // Основная функция
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
-	fmt.Println("Введите выражение (например, \"hello\" + \"world\"): ")
 	for scanner.Scan() {
 		input := scanner.Text()
 		input = strings.TrimSpace(input)
