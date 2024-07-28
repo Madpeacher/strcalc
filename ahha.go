@@ -9,83 +9,86 @@ import (
 	"strings"
 )
 
-func calc(a string) string {
-	var numc int
-	numc = -999999
-	var splittedA []string
-	pat := `[\+\-\*/]`
-	re := regexp.MustCompile(pat)
-	splittedB := re.Split(a, -1)
-	for i, part := range splittedB {
-		if i > 0 {
-			splittedA = append(splittedA, re.FindAllString(a, -1)[i-1])
-		}
-		splittedA = append(splittedA, part)
+// Функция для обрезки строки, если она длиннее 40 символов
+func truncateString(s string) string {
+	if len(s) > 40 {
+		return s[:40] + "..."
 	}
-	pattern := `^\d+$`
-	reg, _ := regexp.Compile(pattern)
-	matched := reg.MatchString(splittedA[2])
-	if matched {
-		numc, _ = strconv.Atoi(splittedA[2])
-	}
-	contains := strings.Contains(splittedA[0], "\"")
-	if contains {
-		splittedA[0] = strings.Replace(splittedA[0], "\"", "", -1)
-	} else {
-		panic("Первый элемент не строчка")
-	}
-	if len(splittedA[0]) > 10 {
-		panic("Количество символо больше 10")
-	}
-	contain2 := strings.Contains(splittedA[2], "\"")
-	if contain2 {
-		splittedA[2] = strings.Replace(splittedA[2], "\"", "", -1)
-		if len(splittedA[2]) > 10 {
-			panic("Количество символо больше 10")
-		}
-	} else {
-		numc, _ = strconv.Atoi(splittedA[2])
-		if numc > 10 {
-			panic("Число больше 10")
-		}
-	}
-	var result string
-	switch splittedA[1] {
-	case "+":
-		if numc != -999999 {
-			panic("Нельзя прибавлять str")
-		}
-		result = splittedA[0] + splittedA[2]
-	case "-":
-		if numc != -999999 {
-			panic("Нельзя вычитать str")
-		}
-		result = strings.Replace(splittedA[0], splittedA[2], "", -1)
-	case "*":
-		if numc == -999999 {
-			panic("Нельзя умножать на str")
-		}
-		split := splittedA[0]
-		for i := 0; i < numc-1; i++ {
-			splittedA[0] = splittedA[0] + split
-		}
-		result = splittedA[0]
-	case "/":
-		if numc == -999999 {
-			panic("Нельзя делить на str")
-		}
-		ru := len(splittedA[0]) / numc
-		result = splittedA[0][:ru]
-	}
-	if len(result) > 40 {
-		return (splittedA[0][:41] + "...")
-	}
-	return result
+	return s
 }
+
+// Функция для сложения строк с пробелом
+func addStrings(a, b string) string {
+	return a + " " + b
+}
+
+// Функция для вычитания строки из строки
+func subtractStrings(a, b string) string {
+	return strings.Replace(a, b, "", -1)
+}
+
+// Функция для умножения строки на число
+func multiplyString(a string, n int) string {
+	var result strings.Builder
+	for i := 0; i < n; i++ {
+		result.WriteString(a) // добавление строки к sB
+	}
+	return result.String()
+}
+
+// Функция для деления строки на число
+func divideString(a string, n int) string {
+	if n <= 0 || len(a) == 0 {
+		panic("Неверный ввод")
+	}
+	if len(a)%n != 0 {
+		panic("Длина строки не делится на число")
+	}
+	partLength := len(a) / n
+	return a[:partLength]
+}
+
+// Основная функция
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
-	if scanner.Scan() {
-		a := scanner.Text()
-		fmt.Println(calc(a))
+	for scanner.Scan() {
+		input := scanner.Text()
+		input = strings.TrimSpace(input)
+
+		// Регулярные выражения для анализа
+		stringOpRegex := regexp.MustCompile(`^"(.*?)"\s*(\+|-)\s*"(.*?)"$`)
+		numOpRegex := regexp.MustCompile(`^"(.*?)"\s*([\*|/])\s*(\d+)$`)
+
+		if match := stringOpRegex.FindStringSubmatch(input); match != nil {
+			a, op, b := match[1], match[2], match[3]
+			switch op {
+			case "+":
+				result := addStrings(a, b)
+				fmt.Println(truncateString(result))
+			case "-":
+				result := subtractStrings(a, b)
+				fmt.Println(truncateString(result))
+			default:
+				panic("Неверный оператор")
+			}
+		} else if match := numOpRegex.FindStringSubmatch(input); match != nil {
+			a, op, numStr := match[1], match[2], match[3]
+			num, err := strconv.Atoi(numStr)
+			if err != nil || num < 1 || num > 10 {
+				panic("Неверное число")
+			}
+			switch op {
+			case "*":
+				result := multiplyString(a, num)
+				fmt.Println(truncateString(result))
+			case "/":
+				result := divideString(a, num)
+				fmt.Println(truncateString(result))
+			default:
+				panic("Неверная операция")
+			}
+		} else {
+			panic("Неверный формат")
+		}
 	}
 }
