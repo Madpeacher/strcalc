@@ -51,6 +51,7 @@ func divideString(a string, n int) string {
 // Основная функция
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Println("Введите выражение (например, \"hello\" + \"world\"): ")
 	for scanner.Scan() {
 		input := scanner.Text()
 		input = strings.TrimSpace(input)
@@ -61,6 +62,9 @@ func main() {
 
 		if match := stringOpRegex.FindStringSubmatch(input); match != nil {
 			a, op, b := match[1], match[2], match[3]
+			if len(a) > 10 || len(b) > 10 {
+				panic("Каждая строка должна содержать не более 10 символов.")
+			}
 			switch op {
 			case "+":
 				result := addStrings(a, b)
@@ -73,6 +77,9 @@ func main() {
 			}
 		} else if match := numOpRegex.FindStringSubmatch(input); match != nil {
 			a, op, numStr := match[1], match[2], match[3]
+			if len(a) > 10 {
+				panic("Строка должна содержать не более 10 символов.")
+			}
 			num, err := strconv.Atoi(numStr)
 			if err != nil || num < 1 || num > 10 {
 				panic("Неверное число")
